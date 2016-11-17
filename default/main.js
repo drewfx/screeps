@@ -6,7 +6,7 @@ var roleRepairer = require('role.repairer');
 
 module.exports.loop = function () {
 
-
+var mainSpawn = Game.spawns['Main'];
 var harvesters = [];
 var upgraders = [];
 var builders = [];
@@ -27,17 +27,34 @@ for (var i in Game.creeps) {
     }
 }
 
-    if (builders.length < 3) {
-        Game.spawns['Main'].createCreep( [WORK, CARRY, MOVE], null, {role: 'builder'} );
-    }
-    if (upgraders.length < 3) {
-        Game.spawns['Main'].createCreep( [WORK, CARRY, MOVE], null, {role: 'upgrader'} );
-    }
-    if (repairers.length < 1) {
-        Game.spawns['Main'].createCreep( [WORK, WORK, CARRY, CARRY, MOVE], null, {role: 'repairer'} );
-    }
-    if (harvesters.length < 1) {
-        Game.spawns['Main'].createCreep( [WORK, CARRY, MOVE], null, {role: 'harvester'} );
+
+    // TODO: need to functionalize this a bit more.  Too dirty.
+    if (mainSpawn.energyCapacity < 400) {
+        if (builders.length < 3) {
+            mainSpawn.createCreep( [WORK, CARRY, MOVE], null, {role: 'builder'} );
+        }
+        if (upgraders.length < 3) {
+            mainSpawn.createCreep( [WORK, CARRY, MOVE], null, {role: 'upgrader'} );
+        }
+        if (repairers.length < 1) {
+            mainSpawn.createCreep( [WORK, WORK, CARRY], null, {role: 'repairer'} );
+        }
+        if (harvesters.length < 1) {
+            mainSpawn.createCreep( [WORK, CARRY, MOVE], null, {role: 'harvester'} );
+        }
+    } else if (mainSpawn.energyCapacity > 400) {
+        if (builders.length < 3) {
+            mainSpawn.createCreep( [WORK, WORK, CARRY, CARRY, MOVE], null, {role: 'builder'} );
+        }
+        if (upgraders.length < 3) {
+            mainSpawn.createCreep( [WORK, WORK, CARRY, CARRY, MOVE], null, {role: 'upgrader'} );
+        }
+        if (repairers.length < 1) {
+            mainSpawn.createCreep( [WORK, WORK, CARRY, CARRY, MOVE], null, {role: 'repairer'} );
+        }
+        if (harvesters.length < 1) {
+            mainSpawn.createCreep( [WORK, WORK, CARRY, CARRY, MOVE], null, {role: 'harvester'} );
+        }
     }
 
     for(var name in Game.creeps) {
