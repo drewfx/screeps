@@ -1,10 +1,16 @@
 var roleHarvester = require('role.harvester');
 var roleUpgrader = require('role.upgrader');
 var roleBuilder = require('role.builder');
+var roleRepairer = require('role.repairer');
+
+
+module.exports.loop = function () {
+
 
 var harvesters = [];
 var upgraders = [];
 var builders = [];
+var repairers = [];
 
 for (var i in Game.creeps) {
     if(Game.creeps[i].memory.role == 'harvester') {
@@ -16,34 +22,25 @@ for (var i in Game.creeps) {
     if(Game.creeps[i].memory.role == 'upgrader') {
         upgraders.push(Game.creeps[i]);
     }
+    if(Game.creeps[i].memory.role == 'repairer') {
+        repairers.push(Game.creeps[i]);
+    }
 }
 
-module.exports.loop = function () {
-    var tower = Game.getObjectById('0bc4a79bbd073c7e0099a714');
-    if(tower) {
-        var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
-            filter: (structure) => structure.hits < structure.hitsMax
-        });
-        if(closestDamagedStructure) {
-            tower.repair(closestDamagedStructure);
-        }
-
-        var closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
-        if(closestHostile) {
-            tower.attack(closestHostile);
-        }
+    if (builders.length < 3) {
+        Game.spawns['Main'].createCreep( [WORK, CARRY, MOVE], null, {role: 'builder'} );
     }
-    
-    if (harvesters.length < 4) {
-        Game.spawns['Main'].createCreep( [WORK, CARRY, MOVE], 'H'+(harvesters.length+1), {role: 'harvester'} );
-    } else if (builders.length < 3) {
-        Game.spawns['Main'].createCreep( [WORK, CARRY, MOVE], 'B'+(builders.length+1), {role: 'builder'} );
-    } else if (upgraders.length < 3) {
-        Game.spawns['Main'].createCreep( [WORK, CARRY, MOVE], 'U'+(upgraders.length+1), {role: 'upgrader'} );
+    if (upgraders.length < 3) {
+        Game.spawns['Main'].createCreep( [WORK, CARRY, MOVE], null, {role: 'upgrader'} );
+    }
+    if (repairers.length < 1) {
+        Game.spawns['Main'].createCreep( [WORK, WORK, CARRY, CARRY, MOVE], null, {role: 'repairer'} );
+    }
+    if (harvesters.length < 1) {
+        Game.spawns['Main'].createCreep( [WORK, CARRY, MOVE], null, {role: 'harvester'} );
     }
 
     for(var name in Game.creeps) {
-
         var creep = Game.creeps[name];
 
         if(creep.memory.role == 'harvester') {
@@ -55,14 +52,24 @@ module.exports.loop = function () {
         if(creep.memory.role == 'builder') {
             roleBuilder.run(creep);
         }
+        if(creep.memory.role == 'repairer') {
+            roleRepairer.run(creep);
+        }
     }
+    
+    // population report
+    var report = "Builders: "+builders.length+"  Harvesters: "+harvesters.length+"  Upgraders: "+upgraders.length+"  Repairers: "+repairers.length;
+    console.log(report);
 }
 
 // Note
 /**
- * Create Harvester: 
- * Game.spawns['Main'].createCreep( [WORK, CARRY, MOVE], 'Harvester2', {role: 'harvester'} );
+ * Create Harvester:
+ * Game.spawns['Main'].createCreep( [WORK, CARRY, MOVE], null, {role: 'harvester'} );
  * 
- * Game.spawns['Main'].createCreep( [WORK, CARRY, MOVE], 'Builder1', {role: 'builder'} );
+ * Game.spawns['Main'].createCreep( [WORK, WORK, CARRY, CARRY, MOVE], null, {role: 'harvester'} );
  * 
+ * 
+ * REPAIRER STOPS WORKING HARD RESET
+ * Game.getObjectById('id').memory.repairing = false;
  */

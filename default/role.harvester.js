@@ -13,12 +13,22 @@ var roleHarvester = {
                     filter: (structure) => {
                         return (structure.structureType == STRUCTURE_EXTENSION ||
                                 structure.structureType == STRUCTURE_SPAWN ||
-                                structure.structureType == STRUCTURE_TOWER) && structure.energy < structure.energyCapacity;
+                                structure.structureType == STRUCTURE_TOWER ||
+                                structure.structureType == STRUCTURE_CONTAINER) && structure.energy < structure.energyCapacity;
                     }
             });
             if(targets.length > 0) {
                 if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(targets[0]);
+                }
+            } else {
+                var target = creep.pos.findClosestByRange(FIND_DROPPED_ENERGY);
+                if(target) {
+                    if(creep.pickup(target) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(target);
+                    }
+                } else {
+                    creep.moveTo(Game.flags.harvesterIdle);
                 }
             }
         }
